@@ -1,0 +1,8 @@
+{
+  "version": "0.5.104",
+  "codexVersion": "0.163.0",
+  "host": "127.0.0.1",
+  "port": 20128,
+  "model": "gpt-6.1-sol",
+  "reasoningEffort": "xhigh"
+}

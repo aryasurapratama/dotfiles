@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
 set -euo pipefail
-
-npm config set allow-scripts=9router --location=user
-npm install --global 9router
+AI_TOOLS_DOTFILES_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+exec bash "$AI_TOOLS_DOTFILES_DIR/scripts/install-ai-tools.sh"
