@@ -169,10 +169,12 @@ function installLaunchers(ctx) {
     fs.chmodSync(filename, 0o700);
   }
   const snippet = '\n# ai-tools managed PATH\nexport PATH="$HOME/.local/bin:$PATH"\n';
+  const autostart = `\n# ai-tools managed autostart\nif [ "\${CODESPACES:-}" = "true" ] && [ -f ${shellQuote(path.join(ctx.router, 'db/data.sqlite'))} ]; then\n  (umask 077; ${shellQuote(process.execPath)} ${shellQuote(installed)} run >> ${shellQuote(path.join(ctx.state, 'autostart.log'))} 2>&1 </dev/null &)\nfi\n`;
   for (const filename of ['.bashrc', '.profile', ...(exists(path.join(ctx.user, '.zshrc')) ? ['.zshrc'] : [])]) {
     const file = path.join(ctx.user, filename);
     const contents = exists(file) ? fs.readFileSync(file, 'utf8') : '';
     if (!contents.includes('# ai-tools managed PATH')) fs.appendFileSync(file, snippet, { mode: 0o600 });
+    if (!contents.includes('# ai-tools managed autostart')) fs.appendFileSync(file, autostart, { mode: 0o600 });
   }
 }
 
