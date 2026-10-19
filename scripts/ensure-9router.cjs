@@ -249,7 +249,7 @@ async function prepare(ctx, status) {
 }
 
 function importBackup(ctx) {
-  if (!process.env.NINE_ROUTER_BACKUP_BASE64 || exists(path.join(ctx.router, 'db/data.sqlite'))) return;
+  if (!process.env.NINE_ROUTER_BACKUP_BASE64) return false;
   const packed = Buffer.from(process.env.NINE_ROUTER_BACKUP_BASE64, 'base64');
   const data = JSON.parse(gunzipSync(packed, { maxOutputLength: 32 * 1024 * 1024 }).toString());
   if (data.format !== 1 || !data.files || typeof data.files !== 'object') throw new Error('Format backup 9Router tidak valid.');
@@ -261,9 +261,19 @@ function importBackup(ctx) {
   let importedCodex = false;
   for (const [name, value] of Object.entries(data.files)) {
     const filename = path.join(ctx.state, name);
-    if (!exists(filename)) {
+    // config.toml is the canonical shared Codex configuration. Keep every
+    // Codespace on the same provider/model/login settings whenever the
+    // encrypted Codespaces Secret is available. Runtime data and provider
+    // databases remain local after their first import.
+    if (name === 'codex/config.toml') {
+      const contents = Buffer.from(value, 'base64');
+      if (!exists(filename) || !fs.readFileSync(filename).equals(contents)) {
+        if (exists(filename)) writePrivate(`${filename}.before-ai-tools-sync-${Date.now()}`, fs.readFileSync(filename));
+        writePrivate(filename, contents);
+      }
+      importedCodex = true;
+    } else if (!exists(filename)) {
       writePrivate(filename, Buffer.from(value, 'base64'));
-      if (name === 'codex/config.toml') importedCodex = true;
     }
   }
   return importedCodex;
