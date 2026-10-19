@@ -18,6 +18,5 @@ if (( AI_TOOLS_NODE_MAJOR < 24 )); then
   nvm use 24
 fi
 # Restore the persistent account and start the gateway during Codespaces
-# dotfiles setup. Without the second step, the Codex extension starts before
-# its local provider is listening and falls back to the ChatGPT sign-in view.
+# dotfiles setup so the configured local provider is ready for the IDE.
 node "$AI_TOOLS_SCRIPT_DIR/ensure-9router.cjs" run
